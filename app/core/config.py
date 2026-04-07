@@ -15,7 +15,7 @@ class Settings(BaseSettings):
         return self
 
     jwt_algorithm: str = "HS256"
-    chroma_persist_path: str = "/data/chroma"
+    chroma_persist_path: str = "./chroma_data"
     cors_origins: str = "http://localhost:4200"
     frontend_url: str = "http://localhost:4200"
     environment: str = "development"

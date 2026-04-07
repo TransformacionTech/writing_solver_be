@@ -13,7 +13,7 @@ services:
       - key: FRONTEND_URL
         value: https://writing-solver-fe.onrender.com
       - key: CHROMA_PERSIST_PATH
-        value: /data/chroma
+        value: ./chroma_data
       - key: ENVIRONMENT
         value: production
       - key: GITHUB_CLIENT_ID
@@ -24,7 +24,9 @@ services:
         generateValue: true
       - key: OPENAI_API_KEY
         sync: false
-    disk:
-      name: chroma-data
-      mountPath: /data/chroma
-      sizeGB: 1
+    # Uncomment to enable persistent disk (prevents data loss on redeploy):
+    # disk:
+    #   name: chroma-data
+    #   mountPath: /data/chroma
+    #   sizeGB: 1
+    # Then set CHROMA_PERSIST_PATH=/data/chroma in envVars above
