@@ -7,8 +7,6 @@ from app.services import auth_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-_FRONTEND_CALLBACK = "http://localhost:4200"
-
 
 @router.post("/github", response_model=AuthTokenResponse)
 async def github_auth(body: GitHubAuthRequest) -> AuthTokenResponse:
@@ -22,5 +20,5 @@ async def github_callback(code: str = Query(...)) -> RedirectResponse:
     result = await auth_service.exchange_code_for_token(code=code)
     token = result["access_token"]
     return RedirectResponse(
-        url=f"{_FRONTEND_CALLBACK}/login-success?token={token}",
+        url=f"{settings.frontend_url}/login-success?token={token}",
     )

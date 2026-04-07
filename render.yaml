@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: writing-solver-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.10"
+      - key: CORS_ORIGINS
+        value: https://writing-solver-fe.onrender.com
+      - key: FRONTEND_URL
+        value: https://writing-solver-fe.onrender.com
+      - key: CHROMA_PERSIST_PATH
+        value: /data/chroma
+      - key: ENVIRONMENT
+        value: production
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: OPENAI_API_KEY
+        sync: false
+    disk:
+      name: chroma-data
+      mountPath: /data/chroma
+      sizeGB: 1
