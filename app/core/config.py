@@ -16,8 +16,8 @@ class Settings(BaseSettings):
 
     jwt_algorithm: str = "HS256"
     chroma_persist_path: str = "./chroma_data"
-    cors_origins: str = "http://localhost:4200"
-    frontend_url: str = "http://localhost:4200"
+    cors_origins: str = "https://writing-solver-fe.onrender.com"
+    frontend_url: str = "https://writing-solver-fe.onrender.com"
     environment: str = "development"
 
     @property

@@ -9,7 +9,7 @@ relevante desde `system_spec/index.md`.
 
 API FastAPI para orquestación de agentes CrewAI orientados a generación,
 edición y validación de posts LinkedIn para Tech And Solve.
-Frontend: Angular 21 en `http://localhost:4200`.
+Frontend: Angular 21 en `https://writing-solver-fe.onrender.com`.
 
 ---
 
