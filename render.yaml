@@ -7,7 +7,7 @@ services:
     healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
-        value: "3.12.10"
+        value: "3.11.11"
       - key: CORS_ORIGINS
         value: https://writing-solver-fe.onrender.com
       - key: FRONTEND_URL
