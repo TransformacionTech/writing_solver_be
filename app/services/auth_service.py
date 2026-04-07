@@ -33,16 +33,21 @@ async def exchange_code_for_token(code: str) -> dict:
         user = user_resp.json()
 
     jwt_token = create_access_token(
-        data={"sub": str(user["id"]), "login": user["login"]},
+        data={
+            "sub": str(user["id"]),
+            "username": user["login"],
+            "email": user.get("email", ""),
+            "avatar_url": user.get("avatar_url", ""),
+        },
     )
 
     return {
         "access_token": jwt_token,
         "token_type": "bearer",
         "user": {
-            "id": user["id"],
-            "login": user["login"],
+            "id": str(user["id"]),
+            "username": user["login"],
+            "email": user.get("email", ""),
             "avatar_url": user.get("avatar_url", ""),
-            "name": user.get("name", ""),
         },
     }
