@@ -38,6 +38,7 @@ async def exchange_code_for_token(code: str) -> dict:
 
     return {
         "access_token": jwt_token,
+        "token": jwt_token,
         "token_type": "bearer",
         "user": {
             "id": user["id"],
