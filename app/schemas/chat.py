@@ -1,10 +1,17 @@
 from pydantic import BaseModel
 
 
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+
 class ChatRequest(BaseModel):
-    message: str
-    history: list[dict] = []
+    mensaje: str
+    post_actual: str
+    history: list[ChatMessage] = []
 
 
 class ChatResponse(BaseModel):
-    reply: str
+    respuesta: str
+    post_modificado: bool

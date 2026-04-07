@@ -1,3 +1,6 @@
+import asyncio
+import logging
+
 from fastapi import APIRouter, Depends
 from sse_starlette.sse import EventSourceResponse
 
@@ -5,6 +8,8 @@ from app.core.security import get_current_user
 from app.schemas.chat import ChatRequest, ChatResponse
 from app.schemas.pipeline import PipelineRunRequest
 from app.services import pipeline_service
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/pipeline", tags=["pipeline"])
 
@@ -15,11 +20,14 @@ async def run_pipeline(
     _user: dict = Depends(get_current_user),
 ) -> EventSourceResponse:
     async def event_generator():
-        async for event in pipeline_service.run_pipeline(
-            topic=body.topic,
-            context=body.context,
-        ):
-            yield {"data": event}
+        try:
+            async for event in pipeline_service.run_pipeline(
+                topic=body.topic,
+                context=body.context,
+            ):
+                yield {"data": event}
+        except asyncio.CancelledError:
+            logger.info("Client disconnected, pipeline cancelled.")
 
     return EventSourceResponse(event_generator())
 
@@ -29,8 +37,9 @@ async def chat(
     body: ChatRequest,
     _user: dict = Depends(get_current_user),
 ) -> ChatResponse:
-    reply = await pipeline_service.chat(
-        message=body.message,
-        history=body.history,
+    result = await pipeline_service.chat(
+        mensaje=body.mensaje,
+        post_actual=body.post_actual,
+        history=[m.model_dump() for m in body.history],
     )
-    return ChatResponse(reply=reply)
+    return ChatResponse(**result)

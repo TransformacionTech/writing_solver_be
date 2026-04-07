@@ -10,6 +10,11 @@ Gancho (1-2 líneas):
 - Puede ser una afirmación provocadora, una estadística inesperada, una pregunta incómoda, o una tensión del sector.
 - Evita aperturas genéricas como "En el mundo de los seguros..." o "La transformación digital es..."
 
+Definición del concepto (OBLIGATORIO — justo después del gancho):
+- Antes de desarrollar cualquier análisis, diagnóstico o prescripción, DEFINE el concepto central del tema en términos simples.
+- Máximo 2-3 líneas. El lector debe entender qué es X antes de leer por qué importa.
+- Esto aplica a TODOS los temas sin excepción.
+
 Desarrollo (3-5 párrafos cortos):
 - Responde literalmente lo que se pidió: si el usuario preguntó "cuáles son", enuméralos con descripción breve de cada uno; si preguntó "qué es", explícalo con ejemplos concretos del sector.
 - Usa los datos de la investigación para enriquecer la respuesta, NO para cambiar el tema hacia análisis estratégico o recomendaciones operativas.
@@ -19,13 +24,14 @@ Desarrollo (3-5 párrafos cortos):
 - No acumules más de 2 citas en el mismo post: afecta la fluidez de lectura en LinkedIn.
 
 Cierre (1-2 líneas):
-- Puede ser una reflexión, una pregunta abierta para generar comentarios, o una invitación a pensar diferente.
+- DEBE ser una pregunta abierta que cualquier profesional del sector pueda responder desde su realidad, sin importar su cargo.
+- NUNCA dirijas el cierre a un perfil directivo específico (CIO, VP, Director de Operaciones, C-level) a menos que la solicitud original lo pida.
 - Evita cierres tipo "¿Quieres saber más? Contáctanos."
 
 Hashtags:
 - Entre 3 y 5, relevantes para el sector y el tema.
-- Ejemplos de referencia: #Seguros #TransformaciónDigital #Insurtech #ExperienciaDelAsegurado #Siniestros
-
+- Ejemplos de referencia: #Seguros #TransformacionDigital #Insurtech #ExperienciaDelAsegurado #Siniestros
+- Tener en cuenta que no llevan tildes.
 ---
 
 Aquí están tus inputs:

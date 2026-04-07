@@ -15,7 +15,7 @@ def auth_headers() -> dict[str, str]:
 async def test_run_pipeline_requires_auth():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        resp = await client.post("/pipeline/run", json={"topic": "AI", "user_id": "1"})
+        resp = await client.post("/pipeline/run", json={"topic": "AI"})
     assert resp.status_code == 401
 
 
@@ -23,7 +23,10 @@ async def test_run_pipeline_requires_auth():
 async def test_chat_requires_auth():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        resp = await client.post("/pipeline/chat", json={"message": "hello"})
+        resp = await client.post(
+            "/pipeline/chat",
+            json={"mensaje": "hello", "post_actual": "test post"},
+        )
     assert resp.status_code == 401
 
 
@@ -33,9 +36,10 @@ async def test_chat_with_auth(auth_headers: dict[str, str]):
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         resp = await client.post(
             "/pipeline/chat",
-            json={"message": "hello"},
+            json={"mensaje": "cuantas palabras tiene?", "post_actual": "Este es un post de prueba."},
             headers=auth_headers,
         )
     assert resp.status_code == 200
     data = resp.json()
-    assert "reply" in data
+    assert "respuesta" in data
+    assert "post_modificado" in data

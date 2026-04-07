@@ -11,5 +11,5 @@ router = APIRouter(prefix="/pipeline", tags=["topics"])
 async def suggest_topics(
     _user: dict = Depends(get_current_user),
 ) -> TopicsResponse:
-    result = await pipeline_service.suggest_topics()
-    return TopicsResponse(topics=[result])
+    topics = await pipeline_service.suggest_topics()
+    return TopicsResponse(topics=topics)

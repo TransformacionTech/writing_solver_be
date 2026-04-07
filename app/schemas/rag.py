@@ -1,16 +1,6 @@
 from pydantic import BaseModel
 
 
-class RagUpdateRequest(BaseModel):
-    content: str
-    metadata: dict = {}
-
-
-class RagUpdateResponse(BaseModel):
-    status: str
-    document_id: str
-
-
 class RagUploadResponse(BaseModel):
     status: str
     filename: str

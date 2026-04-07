@@ -4,7 +4,7 @@ from pydantic import BaseModel
 class PipelineRunRequest(BaseModel):
     topic: str
     context: str | None = None
-    user_id: str
+    user_id: str | None = None
 
 
 class PipelineProgressEvent(BaseModel):

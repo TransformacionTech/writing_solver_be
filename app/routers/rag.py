@@ -1,24 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile
 
 from app.core.security import get_current_user
-from app.schemas.rag import RagUpdateRequest, RagUpdateResponse, RagUploadResponse
+from app.schemas.rag import RagUploadResponse
 from app.services import rag_service
 
 router = APIRouter(prefix="/pipeline", tags=["rag"])
 
 
-@router.post("/update-rag", response_model=RagUpdateResponse)
-async def update_rag(
-    body: RagUpdateRequest,
-    _user: dict = Depends(get_current_user),
-) -> RagUpdateResponse:
-    doc_id = rag_service.add_document(content=body.content, metadata=body.metadata)
-    return RagUpdateResponse(status="ok", document_id=doc_id)
-
-
 @router.post("/upload-rag", response_model=RagUploadResponse)
 async def upload_rag_file(
     file: UploadFile,
+    source: str = Form("manual_upload"),
+    topic: str = Form(""),
     _user: dict = Depends(get_current_user),
 ) -> RagUploadResponse:
     filename = file.filename or "unknown"
@@ -31,7 +24,16 @@ async def upload_rag_file(
         )
 
     file_bytes = await file.read()
-    doc_ids = rag_service.add_file(file_bytes=file_bytes, filename=filename)
+
+    extra_metadata: dict[str, str] = {"upload_source": source}
+    if topic:
+        extra_metadata["topic"] = topic
+
+    doc_ids = rag_service.add_file(
+        file_bytes=file_bytes,
+        filename=filename,
+        extra_metadata=extra_metadata,
+    )
 
     return RagUploadResponse(
         status="ok",

@@ -1,11 +1,51 @@
+# --- Secrets & credentials ---
+.env
+.env.*
+!.env.example
+
+# --- ChromaDB vectorstore (data local, se regenera) ---
+chroma_db/
+
+# --- Python ---
 __pycache__/
 *.py[cod]
+*.pyo
 *.egg-info/
 dist/
 build/
-.env
-chroma_db/
+*.egg
+
+# --- Virtual environments ---
 .venv/
 venv/
+env/
+
+# --- Testing & linting ---
 .pytest_cache/
 .ruff_cache/
+.coverage
+htmlcov/
+
+# --- IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- Claude Code (settings locales, memorias) ---
+/.claude
+
+# --- Specs internas (documentación privada del proyecto) ---
+system_spec/
+
+# --- OS ---
+Thumbs.db
+.DS_Store
+
+# --- Jupyter notebooks (pueden contener output con secrets) ---
+*.ipynb
+!app/tests/**/*.ipynb
+
+# --- Logs ---
+*.log

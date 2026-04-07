@@ -39,7 +39,16 @@ readerTask = Task(
             ✅ No menciona cargos ni valores explícitos ("somos los mejores",
                 precios, métricas que no están en el brief)
             ✅ Si menciona a Tech And Solve, lo hace de forma natural, no forzada
+            ✅ El concepto central del tema DEBE estar definido en términos simples
+                ANTES de cualquier análisis, diagnóstico o prescripción
+            ✅ El cierre NO debe estar dirigido a un cargo directivo específico
+                (CIO, VP, Director, C-level) a menos que la solicitud original
+                lo haya pedido explícitamente
             ❌ Penaliza cada violación de regla dura con -1 punto
+            ❌ -1 si el post desarrolla o analiza un concepto sin haberlo
+                definido primero en términos simples
+            ❌ -1 si el cierre está dirigido explícitamente a un perfil
+                directivo o cargo específico sin que la solicitud lo pidiera
 
         [E] CIERRE — ¿Deja la sensación correcta?
             ✅ Frase memorable, reflexión, invitación suave o CTA sutil
