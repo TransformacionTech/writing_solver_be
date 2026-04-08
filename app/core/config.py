@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     chroma_persist_path: str = "./chroma_db"
     cors_origins: str = "http://localhost:4200"
+    frontend_url: str = "http://localhost:4200"
     environment: str = "development"
 
     @property
