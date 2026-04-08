@@ -13,9 +13,11 @@ class Settings(BaseSettings):
         if not self.jwt_secret:
             self.jwt_secret = self.openai_api_key
         return self
+
     jwt_algorithm: str = "HS256"
-    chroma_persist_path: str = "./chroma_db"
-    cors_origins: str = "http://localhost:4200"
+    chroma_persist_path: str = "./chroma_data"
+    cors_origins: str = "https://writing-solver-fe.onrender.com"
+    frontend_url: str = "https://writing-solver-fe.onrender.com"
     environment: str = "development"
 
     @property

@@ -5,6 +5,7 @@
 
 # --- ChromaDB vectorstore (data local, se regenera) ---
 chroma_db/
+chroma_data/
 
 # --- Python ---
 __pycache__/

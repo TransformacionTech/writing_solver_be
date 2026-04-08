@@ -5,11 +5,39 @@ relevante desde `system_spec/index.md`.
 
 ---
 
+## Estrategia de ramas — LEER ANTES DE HACER CAMBIOS
+
+| Rama | Propósito | Frontend esperado |
+|---|---|---|
+| `main` | Desarrollo local | `http://localhost:4200` |
+| `deploy` | Producción en Render | `https://writing-solver-fe.onrender.com` |
+
+**Reglas:**
+- Desarrollar en `main`. Merge a `deploy` para desplegar a producción.
+- El archivo `.env` **nunca se sube** al repo. Render usa variables de entorno del dashboard.
+
+### Archivos que difieren entre ramas
+
+**`main` (local):**
+- `app/core/config.py` → `cors_origins: "http://localhost:4200"`, sin `frontend_url`
+- `.env` → credenciales de desarrollo (no se sube al repo)
+
+**`deploy` (Render):**
+- `app/core/config.py` → `cors_origins: "https://writing-solver-fe.onrender.com"`, `frontend_url: "https://writing-solver-fe.onrender.com"`
+- Variables de entorno configuradas en el dashboard de Render (no en `.env`)
+
+### Ejecución local (rama `main`)
+```bash
+uvicorn app.main:app --reload   # http://localhost:8000
+```
+
+---
+
 ## Proyecto
 
 API FastAPI para orquestación de agentes CrewAI orientados a generación,
 edición y validación de posts LinkedIn para Tech And Solve.
-Frontend: Angular 21 en `http://localhost:4200`.
+Frontend local: `http://localhost:4200` | Frontend producción: `https://writing-solver-fe.onrender.com`.
 
 ---
 
