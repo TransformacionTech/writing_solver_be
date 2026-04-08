@@ -34,12 +34,6 @@ htmlcov/
 *.swo
 *~
 
-# --- Claude Code (settings locales, memorias) ---
-/.claude
-
-# --- Specs internas (documentación privada del proyecto) ---
-system_spec/
-
 # --- OS ---
 Thumbs.db
 .DS_Store
