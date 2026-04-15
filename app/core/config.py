@@ -7,6 +7,14 @@ class Settings(BaseSettings):
     github_client_id: str = ""
     github_client_secret: str = ""
     jwt_secret: str = ""
+    # Supabase
+    supabase_url: str = ""
+    supabase_key: str = ""
+    # Tavily
+    tavily_api_key: str = ""
+    # SendGrid
+    sendgrid_api_key: str = ""
+    sendgrid_from_email: str = ""
 
     @model_validator(mode="after")
     def _default_jwt_secret(self) -> "Settings":
