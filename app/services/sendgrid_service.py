@@ -1,6 +1,7 @@
 """SendGrid email service for curation reports."""
 from __future__ import annotations
 
+import logging
 from datetime import datetime
 from typing import Any
 
@@ -8,6 +9,8 @@ import sendgrid
 from sendgrid.helpers.mail import Mail, To
 
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
@@ -140,30 +143,59 @@ def _build_html(report: dict[str, Any]) -> str:
 # Send
 # ---------------------------------------------------------------------------
 
-def send_curation_report(subscribers: list[str], report: dict[str, Any]) -> bool:
+class SendResult:
+    """Wrapper to carry status + diagnostics back to the caller."""
+    def __init__(self, ok: bool, status_code: int, body: str, detail: str = ""):
+        self.ok = ok
+        self.status_code = status_code
+        self.body = body
+        self.detail = detail
+
+    def __bool__(self) -> bool:
+        return self.ok
+
+
+def send_curation_report(subscribers: list[str], report: dict[str, Any]) -> SendResult:
     """
     Send the curation report to all subscribers via SendGrid.
-    Returns True on success, False on failure.
+    Returns SendResult (truthy on success).
     """
     if not subscribers:
-        return False
+        return SendResult(False, 0, "", "No hay suscriptores.")
 
     if not settings.sendgrid_api_key or not settings.sendgrid_from_email:
         raise RuntimeError("SENDGRID_API_KEY and SENDGRID_FROM_EMAIL must be set.")
 
     html_content = _build_html(report)
-    subject = f"📋 Curación de Contenidos — {report.get('title', 'Novedades del Sector')}"
+    subject = f"Curación de Contenidos — {report.get('title', 'Novedades del Sector')}"
 
-    message = Mail(
-        from_email=settings.sendgrid_from_email,
-        to_emails=[To(email) for email in subscribers],
-        subject=subject,
-        html_content=html_content,
-    )
-
+    # Send one email per subscriber for better deliverability
     sg = sendgrid.SendGridAPIClient(api_key=settings.sendgrid_api_key)
-    response = sg.send(message)
-    return response.status_code in (200, 202)
+    all_ok = True
+    last_status = 0
+    last_body = ""
+
+    for email in subscribers:
+        message = Mail(
+            from_email=settings.sendgrid_from_email,
+            to_emails=email,
+            subject=subject,
+            html_content=html_content,
+        )
+        response = sg.send(message)
+        last_status = response.status_code
+        last_body = response.body.decode() if response.body else ""
+
+        logger.info(
+            "SendGrid → %s | status=%s headers=%s body=%s",
+            email, response.status_code, dict(response.headers or {}), last_body,
+        )
+
+        if response.status_code not in (200, 202):
+            all_ok = False
+
+    detail = f"status={last_status}, to={subscribers}, from={settings.sendgrid_from_email}"
+    return SendResult(all_ok, last_status, last_body, detail)
 
 
 def send_no_news_email(subscribers: list[str], run_date: str) -> bool:

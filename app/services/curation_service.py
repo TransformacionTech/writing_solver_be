@@ -33,6 +33,7 @@ from app.tasks.readerTask import readerTask
 
 from app.validators.postValidator import validate_post
 
+from app.core.config import settings
 from app.services import supabase_service as supa
 from app.services import tavily_service as tavily
 from app.services import sendgrid_service as sg_service
@@ -417,9 +418,11 @@ async def run_curation_stream() -> AsyncGenerator[str, None]:
         report = _build_report(topics, posts, articles, run_date)
 
         subscribers = supa.get_active_subscribers()
-        yield _evt("progress", step="email", message=f"Enviando a {len(subscribers)} suscriptor(es) vía SendGrid...")
+        yield _evt("progress", step="email", message=f"Enviando a {len(subscribers)} suscriptor(es): {subscribers} desde {settings.sendgrid_from_email}...")
         try:
-            email_sent = sg_service.send_curation_report(subscribers, report)
+            result = sg_service.send_curation_report(subscribers, report)
+            email_sent = bool(result)
+            yield _evt("progress", step="email", message=f"SendGrid respondió: {result.detail}")
         except Exception as e:
             email_sent = False
             yield _evt("progress", step="email", message=f"Error SendGrid: {e}")

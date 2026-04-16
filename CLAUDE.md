@@ -45,9 +45,12 @@ Frontend local: `http://localhost:4200` | Frontend producción: `https://writing
 
 ```
 app/
-├── main.py                  # FastAPI app, CORS, lifespan
-├── routers/                 # pipeline.py, topics.py, rag.py, auth.py
-├── services/                # pipeline_service.py, rag_service.py, auth_service.py
+├── main.py                  # FastAPI app, CORS, lifespan, scheduler
+├── scheduler.py             # APScheduler (curación cada 15 días)
+├── routers/                 # pipeline.py, topics.py, rag.py, auth.py, curation.py
+├── services/                # pipeline_service.py, rag_service.py, auth_service.py,
+│                            # curation_service.py, supabase_service.py,
+│                            # tavily_service.py, sendgrid_service.py
 ├── schemas/                 # Pydantic v2 request/response models
 ├── agents/                  # CrewAI agents (NO modificar lógica interna)
 ├── tasks/                   # CrewAI tasks (NO modificar lógica interna)
@@ -71,6 +74,11 @@ app/
 | POST | `/pipeline/upload-rag` | [rag.md](system_spec/rag.md) |
 | POST | `/auth/github` | [auth.md](system_spec/auth.md) |
 | GET | `/auth/callback` | [auth.md](system_spec/auth.md) |
+| POST | `/curation/run` | [curation.md](system_spec/curation.md) |
+| POST | `/curation/run-stream` | [curation.md](system_spec/curation.md) |
+| GET | `/curation/runs` | [curation.md](system_spec/curation.md) |
+| GET/POST | `/curation/sources` | [curation.md](system_spec/curation.md) |
+| GET/POST | `/curation/subscribers` | [curation.md](system_spec/curation.md) |
 
 ---
 
@@ -93,6 +101,15 @@ app/
 
 6. **CrewAI nunca en hilo async**:
    Siempre ejecutar via `ThreadPoolExecutor` con `run_in_executor`.
+
+7. **Curación no usa researcher**:
+   En `/curation/*` la fuente de contenido es Tavily y la síntesis la hace
+   `curatorAgent`. El writer recibe el contexto ya resuelto.
+
+8. **Servicios externos (Supabase/Tavily/SendGrid) aislados en `services/`**:
+   No importar clientes externos desde agentes, tasks o routers.
+   Todos los accesos pasan por `supabase_service`, `tavily_service`,
+   `sendgrid_service`.
 
 ---
 
@@ -118,3 +135,4 @@ Ver [`system_spec/index.md`](system_spec/index.md) — cargar solo la relevante 
 | [auth.md](system_spec/auth.md) | GitHub OAuth, JWT |
 | [agents.md](system_spec/agents.md) | Agentes, tools, LLMs, criterios evaluación |
 | [config.md](system_spec/config.md) | Env vars, CORS, dependencias, ejecución |
+| [curation.md](system_spec/curation.md) | Curación automática, Supabase, Tavily, SendGrid, scheduler |
