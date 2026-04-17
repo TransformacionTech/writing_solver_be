@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"from app.main import app\")",
+      "Bash(python -m pytest app/tests/ -x --tb=short)",
+      "Bash(python -c \"from app.main import app; print\\(''OK''\\)\")",
+      "Bash(pip install:*)",
+      "Bash(python -c \"from app.main import app; print\\(''Imports OK''\\)\")",
+      "Bash(pip show:*)",
+      "Bash(python -c \"from crewai import LLM; print\\(''LLM class available''\\)\")",
+      "Bash(python -c \"from crewai import Crew; help\\(Crew.kickoff\\)\")",
+      "Bash(python -c \"from crewai.crew import CrewOutput; print\\([a for a in dir\\(CrewOutput\\) if not a.startswith\\(''_''\\)]\\)\")",
+      "Bash(python -c \"from crewai.crew import CrewOutput; print\\(CrewOutput.model_fields.keys\\(\\)\\)\")",
+      "Bash(python -m app.scripts.seed_rag)",
+      "Bash(python -c \"from app.main import app; print\\('OK'\\)\")",
+      "Bash(pip list:*)"
+    ]
+  }
+}

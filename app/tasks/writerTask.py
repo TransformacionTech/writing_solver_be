@@ -23,6 +23,41 @@ Desarrollo (3-5 párrafos cortos):
 - Si la fuente es una organización reconocida por el sector (Swiss Re, Munich Re, MAPFRE, McKinsey, Deloitte, IAIS, FASECOLDA, etc.), inclúyela siempre: aumenta credibilidad ante la audiencia aseguradora.
 - No acumules más de 2 citas en el mismo post: afecta la fluidez de lectura en LinkedIn.
 
+### REGLAS DE ESCRITURA OBLIGATORIAS (aplicar antes del Paso 3)
+
+REGLA: CONTEXTUALIZACIÓN DE ACTORES NO SECTORIALES
+Si el post menciona una organización que no sea aseguradora, reaseguradora,
+consultora global (McKinsey, Deloitte, PwC, Accenture, Gartner) o medio
+especializado del sector (Swiss Re, Munich Re, Lloyd's, Insurance Journal,
+FASECOLDA, AMIS, CNseg, MAPFRE), incluye una línea de contexto que explique
+qué es y por qué es relevante para aseguradoras en LATAM.
+❌ "La AECID anunció una inversión de €25M..."
+✅ "La AECID —agencia de cooperación internacional de España— anunció
+   una inversión de €25M con foco explícito en inclusión financiera en LATAM..."
+Si no puedes contextualizar al actor con los datos disponibles → señalarlo en
+## ALERTAS antes de entregar.
+
+REGLA: CLAIMS COMPARATIVOS REQUIEREN CIFRA + FUENTE + AÑO
+Frases como "freno estructural", "baja penetración", "tendencia creciente",
+"mínimos históricos", "crecimiento acelerado" o cualquier afirmación que
+compare el estado actual del mercado con otro periodo, región o benchmark
+NUNCA pueden aparecer sin cifra + fuente + año inmediatamente adjuntos.
+❌ "...atacar el gran freno estructural de la región—baja penetración—..."
+✅ "...atacar la baja penetración de seguros en LATAM (promedio regional:
+   3% del PIB vs. 8% en mercados desarrollados, Swiss Re 2023)..."
+Si la investigación no provee el dato → NO usar el claim y señalarlo en
+## ALERTAS con la nota: [claim comparativo sin respaldo — no incluido].
+
+REGLA: UN SOLO CIERRE, MODO REFLEXIÓN
+El post termina con exactamente UNA pregunta de cierre.
+Está formulada en modo experiencia o reflexión:
+✅ "¿Qué ves tú...?" / "¿Dónde lo notas en tu operación?" / "¿Cuál es tu lectura?"
+Nunca en modo prescriptivo o imperativo, aunque no nombre un cargo directivo:
+❌ "¿Qué parte de tu cadena de valor tienes que rediseñar primero?"
+❌ "¿Qué deberías cambiar antes de escalar?"
+Si el borrador tiene dos preguntas al final → eliminar la prescriptiva,
+conservar la reflexiva.
+
 Cierre (1-2 líneas):
 - DEBE ser una pregunta abierta que cualquier profesional del sector pueda responder desde su realidad, sin importar su cargo.
 - NUNCA dirijas el cierre a un perfil directivo específico (CIO, VP, Director de Operaciones, C-level) a menos que la solicitud original lo pida.
@@ -32,6 +67,47 @@ Hashtags:
 - Entre 3 y 5, relevantes para el sector y el tema.
 - Ejemplos de referencia: #Seguros #TransformacionDigital #Insurtech #ExperienciaDelAsegurado #Siniestros
 - Tener en cuenta que no llevan tildes.
+
+### VERIFICACIÓN OBLIGATORIA ANTES DE ENTREGAR EL POST
+
+VERIFICACIÓN 1 — HASHTAGS SIN TILDES
+Revisa todos los hashtags del post antes de entregar.
+Ningún hashtag puede contener tildes ni caracteres especiales.
+Corrígelos directamente sin señalarlos como alerta.
+❌ #Tarificación #InnovaciónAbierta #TransformaciónDigital #GobernanzaDeDatos
+✅ #Tarificacion #InnovacionAbierta #TransformacionDigital #GobernanzaDeDatos
+Esta verificación es automática y no requiere nota en ## ALERTAS.
+
+VERIFICACIÓN 2 — ACTORES NO OBVIOS SIEMPRE CONTEXTUALIZADOS
+Antes de entregar, identifica cada organización, plataforma, hub, alianza o
+entidad mencionada en el post que no sea una aseguradora global, reaseguradora,
+consultora de primer nivel o medio especializado del sector reconocido.
+Para cada uno de esos actores, verifica que el post incluya una frase de contexto
+que explique qué es y por qué es relevante para el sector asegurador en LATAM.
+Si falta esa frase → agrégala antes de entregar. No señalarla en ## ALERTAS:
+resolverla directamente en el texto.
+❌ "MIA Hub firmó una colaboración con AACS..."
+✅ "MIA Hub —plataforma global de conexión entre insurtechs y aseguradoras—
+   firmó una colaboración con AACS..."
+
+VERIFICACIÓN 3 — UN SOLO CIERRE, SIN FILTRO DE ROL
+Antes de entregar, lee las últimas 3 líneas del post.
+Verifica que haya exactamente UNA pregunta de cierre.
+Verifica que esa pregunta no comience con ni contenga filtros de rol o tipo
+de organización ("Si sos aseguradora", "Para equipos de TI", "Si liderás
+transformación", "Para directivos", etc.).
+Si hay dos preguntas → fusiónalas en una o elimina la menos reflexiva.
+Si hay filtro de rol → elimínalo y reformula la pregunta para que cualquier
+profesional del sector pueda responderla sin importar su cargo u organización.
+
+VERIFICACIÓN 4 — DATOS O ALERTA EXPLÍCITA
+Antes de entregar, verifica si el post contiene al menos una cifra cuantitativa
+con fuente y año que respalde el argumento central.
+Si la investigación recibida no provee ningún dato cuantitativo utilizable →
+señalarlo en ## ALERTAS con la nota exacta:
+[Sin datos cuantitativos disponibles en la investigación recibida —
+el argumento se sostiene por lógica operativa y caso concreto]
+No inventar cifras. No omitir la alerta si no hay datos.
 ---
 
 Aquí están tus inputs:
