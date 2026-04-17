@@ -140,22 +140,26 @@ def _parse_curator_output(raw: str) -> list[dict]:
 # Step 4 — generate one post per topic using writer → editor ↔ reader
 # ---------------------------------------------------------------------------
 
-async def _generate_post(topic: dict) -> tuple[str, int]:
+async def _generate_post(topic: dict) -> tuple[str, int, bool]:
     """
     Run the write+edit+validate loop for a single topic dict.
-    Returns (final_post_text, score).
+    Returns (final_post_text, score, approved).
     """
-    context = (
+    # Inject the curator's full synthesis INTO the topic string so the writer
+    # actually sees the investigation. The writerTask description only expands
+    # {topic}, not {context}, so we enrich the topic value itself.
+    enriched_topic = (
+        f"{topic['title']}\n\n"
+        f"--- INVESTIGACIÓN DEL CURADOR ---\n\n"
         f"RESUMEN:\n{topic['resumen']}\n\n"
-        f"DATOS CLAVE:\n{topic['datos_clave']}\n\n"
-        f"FUENTES:\n{topic['fuentes']}\n\n"
+        f"DATOS CLAVE (con fuentes):\n{topic['datos_clave']}\n\n"
+        f"FUENTES USADAS:\n{topic['fuentes']}\n\n"
         f"RELEVANCIA SECTORIAL:\n{topic['relevancia']}"
     )
-    topic_input = topic["title"]
 
     # Phase 1 — Write (no researcher: curator already did the research)
     write_crew = Crew(agents=[writer], tasks=[writerTask], verbose=False)
-    write_result = await _run_async(write_crew, {"topic": topic_input, "context": context})
+    write_result = await _run_async(write_crew, {"topic": enriched_topic, "context": ""})
     draft = str(write_result)
 
     # Phase 2 — Edit ↔ Reader loop
@@ -163,6 +167,7 @@ async def _generate_post(topic: dict) -> tuple[str, int]:
     current_post = draft
     score = 0
     feedback = ""
+    approved = False
 
     for _ in range(MAX_EDIT_ITERATIONS):
         phase2_result = await _run_async(edit_crew, {"post": current_post, "feedback": feedback})
@@ -174,9 +179,10 @@ async def _generate_post(topic: dict) -> tuple[str, int]:
             current_post = str(phase2_result.tasks_output[0]).strip()
 
         if validate_post(score=score).is_valid:
+            approved = True
             break
 
-    return current_post, score
+    return current_post, score, approved
 
 
 # ---------------------------------------------------------------------------
@@ -285,19 +291,33 @@ async def run_curation() -> dict:
             return {"status": "no_news", "topics_found": 0, "email_sent": email_sent}
 
         # 4. Generate one post per topic
-        posts: list[tuple[str, int]] = []
+        generated: list[tuple[str, int, bool]] = []
         for topic in topics:
-            post_text, score = await _generate_post(topic)
-            posts.append((post_text, score))
+            post_text, score, approved = await _generate_post(topic)
+            generated.append((post_text, score, approved))
 
-        # 5. Build report and send email
-        report = _build_report(topics, posts, articles, run_date)
+        # Filter to approved only (score >= 8 y validación dura OK)
+        approved_topics: list[dict] = []
+        approved_posts: list[tuple[str, int]] = []
+        for topic, (post_text, score, approved) in zip(topics, generated):
+            if approved:
+                approved_topics.append(topic)
+                approved_posts.append((post_text, score))
+
+        if not approved_posts:
+            supa.update_curation_run(
+                run_id, status="completed", topics_found=0, email_sent=False,
+                error_message="Ningún post aprobado por el reader."
+            )
+            return {"status": "no_approved", "topics_found": 0, "email_sent": False}
+
+        # 5. Build report and send email (solo aprobados)
+        report = _build_report(approved_topics, approved_posts, articles, run_date)
         subscribers = supa.get_active_subscribers()
-        email_sent = sg_service.send_curation_report(subscribers, report)
+        email_sent = bool(sg_service.send_curation_report(subscribers, report))
 
-        # 6. Register processed topics
-        for i, topic in enumerate(topics):
-            post_text, _ = posts[i]
+        # 6. Register processed topics (solo aprobados)
+        for topic, (post_text, _score) in zip(approved_topics, approved_posts):
             supa.save_processed_topic(
                 topic_text=topic["title"],
                 sources_used=[{"url": u} for u in topic["fuentes"].split("\n") if u.strip()],
@@ -309,13 +329,13 @@ async def run_curation() -> dict:
         supa.update_curation_run(
             run_id,
             status="completed",
-            topics_found=len(topics),
+            topics_found=len(approved_topics),
             email_sent=email_sent,
         )
 
         return {
             "status": "completed",
-            "topics_found": len(topics),
+            "topics_found": len(approved_topics),
             "email_sent": email_sent,
             "run_id": run_id,
         }
@@ -407,15 +427,35 @@ async def run_curation_stream() -> AsyncGenerator[str, None]:
 
         yield _evt("progress", step="curator", message=f"{len(topics)} tema(s) identificado(s).")
 
-        posts: list[tuple[str, int]] = []
+        # (post_text, score, approved) per topic
+        generated: list[tuple[str, int, bool]] = []
         for i, topic in enumerate(topics, 1):
             yield _evt("progress", step="writer", message=f"Generando post {i}/{len(topics)}: {topic['title'][:60]}...")
-            post_text, score = await _generate_post(topic)
-            posts.append((post_text, score))
-            yield _evt("progress", step="writer", message=f"Post {i} listo (score {score}/10).")
+            post_text, score, approved = await _generate_post(topic)
+            generated.append((post_text, score, approved))
+            status_tag = "APROBADO" if approved else "RECHAZADO"
+            yield _evt("progress", step="writer", message=f"Post {i} {status_tag} (score {score}/10).")
 
-        yield _evt("progress", step="email", message="Construyendo informe HTML...")
-        report = _build_report(topics, posts, articles, run_date)
+        # Filter to only approved posts (score >= 8 y validación dura OK)
+        approved_topics: list[dict] = []
+        approved_posts: list[tuple[str, int]] = []
+        for topic, (post_text, score, approved) in zip(topics, generated):
+            if approved:
+                approved_topics.append(topic)
+                approved_posts.append((post_text, score))
+
+        if not approved_posts:
+            yield _evt("progress", step="email", message="Ningún post alcanzó score >= 8. No se envía correo.")
+            supa.update_curation_run(
+                run_id, status="completed", topics_found=0, email_sent=False,
+                error_message="Ningún post aprobado por el reader."
+            )
+            yield _evt("result", message="Curación sin posts aprobados. Correo NO enviado (calidad insuficiente).")
+            yield _evt("done")
+            return
+
+        yield _evt("progress", step="email", message=f"{len(approved_posts)} post(s) aprobado(s). Construyendo informe HTML...")
+        report = _build_report(approved_topics, approved_posts, articles, run_date)
 
         subscribers = supa.get_active_subscribers()
         yield _evt("progress", step="email", message=f"Enviando a {len(subscribers)} suscriptor(es): {subscribers} desde {settings.sendgrid_from_email}...")
@@ -428,8 +468,7 @@ async def run_curation_stream() -> AsyncGenerator[str, None]:
             yield _evt("progress", step="email", message=f"Error SendGrid: {e}")
 
         yield _evt("progress", step="register", message="Registrando temas procesados...")
-        for i, topic in enumerate(topics):
-            post_text, _ = posts[i]
+        for topic, (post_text, _score) in zip(approved_topics, approved_posts):
             supa.save_processed_topic(
                 topic_text=topic["title"],
                 sources_used=[{"url": u} for u in topic["fuentes"].split("\n") if u.strip()],
@@ -440,13 +479,13 @@ async def run_curation_stream() -> AsyncGenerator[str, None]:
         supa.update_curation_run(
             run_id,
             status="completed",
-            topics_found=len(topics),
+            topics_found=len(approved_topics),
             email_sent=email_sent,
         )
 
         yield _evt(
             "result",
-            message=f"Curación completada: {len(topics)} tema(s), correo {'enviado' if email_sent else 'NO enviado'}.",
+            message=f"Curación completada: {len(approved_topics)}/{len(topics)} aprobado(s), correo {'enviado' if email_sent else 'NO enviado'}.",
         )
         yield _evt("done")
 
