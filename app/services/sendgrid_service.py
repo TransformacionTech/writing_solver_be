@@ -1,6 +1,7 @@
 """SendGrid email service for curation reports."""
 from __future__ import annotations
 
+import html
 import logging
 import re
 from datetime import datetime
@@ -12,6 +13,41 @@ from sendgrid.helpers.mail import Mail, To
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
+
+
+def _markdown_to_html(text: str) -> str:
+    """
+    Minimal Markdown → HTML converter for LinkedIn-style posts.
+    Handles: **bold**, *italic*, [text](url), line breaks, paragraphs.
+    Escapes any raw HTML first to prevent injection.
+    """
+    if not text:
+        return ""
+
+    # 1. Escape HTML
+    t = html.escape(text)
+
+    # 2. Links [text](url) — must run before italic so the inner * doesn't match
+    t = re.sub(
+        r"\[([^\]]+)\]\(([^\s)]+)\)",
+        r'<a href="\2" style="color:#6200EA">\1</a>',
+        t,
+    )
+
+    # 3. Bold: **text** or __text__
+    t = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", t, flags=re.DOTALL)
+    t = re.sub(r"__(.+?)__", r"<strong>\1</strong>", t, flags=re.DOTALL)
+
+    # 4. Italic: *text* or _text_  (no anidado dentro de ** porque ya se consumió)
+    t = re.sub(r"(?<!\*)\*([^*\n]+?)\*(?!\*)", r"<em>\1</em>", t)
+    t = re.sub(r"(?<!_)_([^_\n]+?)_(?!_)", r"<em>\1</em>", t)
+
+    # 5. Párrafos: doble salto → <p>, salto simple dentro de párrafo → <br>
+    paragraphs = [p.strip() for p in re.split(r"\n{2,}", t) if p.strip()]
+    paragraphs = [p.replace("\n", "<br>") for p in paragraphs]
+    return "".join(
+        f'<p style="margin:0 0 12px 0">{p}</p>' for p in paragraphs
+    )
 
 
 def name_from_email(email: str) -> str:
@@ -82,13 +118,15 @@ def _build_html(report: dict[str, Any], recipient_name: str = "") -> str:
     )
 
     # CHANGE 5 — bloques de post sin "¿Por qué es relevante?"
+    #           — contenido parseado de Markdown a HTML para que **bold**,
+    #             *italic* y párrafos se vean correctamente en el correo
     posts_html = "".join(
         f"""
         <div style="background:#f9f6ff;border-left:4px solid #6200EA;padding:16px 20px;
                     margin-bottom:20px;border-radius:0 8px 8px 0">
             <h3 style="margin:0 0 8px 0;color:#3d0099;font-size:1rem">Post {i + 1}: {p["title"]}</h3>
-            <div style="white-space:pre-wrap;color:#333;font-size:0.9rem;line-height:1.6">
-                {p["content"]}
+            <div style="color:#333;font-size:0.9rem;line-height:1.6">
+                {_markdown_to_html(p["content"])}
             </div>
         </div>
         """
