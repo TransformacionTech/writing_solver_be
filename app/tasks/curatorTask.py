@@ -31,6 +31,7 @@ TEMA 1
 Título: [título corto del tema]
 Resumen: [2-3 párrafos que sintetizan la información encontrada sobre este tema]
 Datos clave: [lista de 2-4 datos concretos con sus fuentes]
+Actores mencionados: [lista cada organización, plataforma, hub o entidad citada en el resumen que no sea una aseguradora global, reaseguradora, consultora de primer nivel o medio especializado reconocido. Para cada uno, incluir: nombre + descripción en una línea + país o región de origen. Si todos los actores son reconocidos globalmente → escribir: "No aplica". Si no puedes identificar qué es un actor con la información disponible → escribir: "[Actor no identificado con la información disponible]". Este campo es obligatorio — el Writer lo usa para contextualizar actores correctamente. No dejar vacío bajo ninguna circunstancia.]
 Fuentes usadas: [lista de URLs o nombres de sitio]
 Relevancia sectorial: [1-2 líneas sobre por qué importa para aseguradoras en LATAM]
 ---
@@ -40,6 +41,7 @@ TEMA 2
 Título: [título corto del tema]
 Resumen: [2-3 párrafos que sintetizan la información encontrada sobre este tema]
 Datos clave: [lista de 2-4 datos concretos con sus fuentes]
+Actores mencionados: [lista cada organización, plataforma, hub o entidad citada en el resumen que no sea una aseguradora global, reaseguradora, consultora de primer nivel o medio especializado reconocido. Para cada uno, incluir: nombre + descripción en una línea + país o región de origen. Si todos los actores son reconocidos globalmente → escribir: "No aplica". Si no puedes identificar qué es un actor con la información disponible → escribir: "[Actor no identificado con la información disponible]". Este campo es obligatorio — el Writer lo usa para contextualizar actores correctamente. No dejar vacío bajo ninguna circunstancia.]
 Fuentes usadas: [lista de URLs o nombres de sitio]
 Relevancia sectorial: [1-2 líneas sobre por qué importa para aseguradoras en LATAM]
 ---
@@ -49,6 +51,7 @@ TEMA 3
 Título: [título corto del tema]
 Resumen: [2-3 párrafos que sintetizan la información encontrada sobre este tema]
 Datos clave: [lista de 2-4 datos concretos con sus fuentes]
+Actores mencionados: [lista cada organización, plataforma, hub o entidad citada en el resumen que no sea una aseguradora global, reaseguradora, consultora de primer nivel o medio especializado reconocido. Para cada uno, incluir: nombre + descripción en una línea + país o región de origen. Si todos los actores son reconocidos globalmente → escribir: "No aplica". Si no puedes identificar qué es un actor con la información disponible → escribir: "[Actor no identificado con la información disponible]". Este campo es obligatorio — el Writer lo usa para contextualizar actores correctamente. No dejar vacío bajo ninguna circunstancia.]
 Fuentes usadas: [lista de URLs o nombres de sitio]
 Relevancia sectorial: [1-2 líneas sobre por qué importa para aseguradoras en LATAM]
 ---
