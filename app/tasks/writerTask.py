@@ -70,13 +70,25 @@ Hashtags:
 
 ### VERIFICACIÓN OBLIGATORIA ANTES DE ENTREGAR EL POST
 
-VERIFICACIÓN 1 — HASHTAGS SIN TILDES
-Revisa todos los hashtags del post antes de entregar.
-Ningún hashtag puede contener tildes ni caracteres especiales.
-Corrígelos directamente sin señalarlos como alerta.
-❌ #Tarificación #InnovaciónAbierta #TransformaciónDigital #GobernanzaDeDatos
-✅ #Tarificacion #InnovacionAbierta #TransformacionDigital #GobernanzaDeDatos
-Esta verificación es automática y no requiere nota en ## ALERTAS.
+VERIFICACIÓN 1 — HASHTAGS SIN TILDES (OBLIGATORIO, SIN EXCEPCIÓN)
+Esta verificación es la última acción antes de entregar el post.
+No es opcional. No se omite aunque el post parezca listo.
+
+PASO 1: Localiza TODOS los hashtags del post.
+PASO 2: Por cada hashtag, revisa carácter por carácter si contiene
+         tilde o carácter especial (á é í ó ú ü ñ Á É Í Ó Ú Ü Ñ).
+PASO 3: Si encuentra alguno → corregirlo directamente en el texto
+         antes de entregar. No señalarlo en ## ALERTAS.
+
+Ejemplos de corrección obligatoria:
+❌ #TransformaciónDigital → ✅ #TransformacionDigital
+❌ #Tarificación         → ✅ #Tarificacion
+❌ #InnovaciónAbierta    → ✅ #InnovacionAbierta
+❌ #GobernanzaDeDatos    → ✅ #GobernanzaDeDatos (sin tilde, ya correcto)
+❌ #LatAm                → ✅ #LatAm (sin tilde, ya correcto)
+
+Si el post se entrega con un hashtag con tilde →
+es un fallo de entrega, no de contenido.
 
 VERIFICACIÓN 2 — ACTORES NO OBVIOS SIEMPRE CONTEXTUALIZADOS
 Antes de entregar, identifica cada organización, plataforma, hub, alianza o

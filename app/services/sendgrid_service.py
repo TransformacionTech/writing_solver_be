@@ -71,10 +71,14 @@ def _build_html(report: dict[str, Any], recipient_name: str = "") -> str:
         for i, p in enumerate(posts)
     )
 
-    # CHANGE 4 — Posts de esta quincena: lista numerada de títulos, sin URLs
+    # CHANGE 4 — Posts de esta quincena: lista numerada (1. 2. 3.) sin URLs
     titles_list_html = "".join(
-        f'<li style="margin-bottom:4px;color:#333">{p["title"]}</li>'
-        for p in posts
+        f"""
+        <div style="margin-bottom:6px;color:#333;font-size:0.92rem;line-height:1.5">
+            <span style="font-weight:600;margin-right:6px">{i + 1}.</span>{p["title"]}
+        </div>
+        """
+        for i, p in enumerate(posts)
     )
 
     # CHANGE 5 — bloques de post sin "¿Por qué es relevante?"
@@ -132,9 +136,9 @@ def _build_html(report: dict[str, Any], recipient_name: str = "") -> str:
                 <!-- CHANGE 4 — Posts de esta quincena -->
                 <h2 style="font-size:0.95rem;text-transform:uppercase;letter-spacing:1px;
                            color:#6200EA;margin:0 0 12px 0">Posts de esta quincena</h2>
-                <ol style="margin:0 0 24px 0;padding-left:20px;color:#333">
+                <div style="margin:0 0 24px 0;color:#333">
                     {titles_list_html}
-                </ol>
+                </div>
 
                 <!-- CHANGE 5 — Post blocks (sin "¿Por qué es relevante?") -->
                 <h2 style="font-size:0.95rem;text-transform:uppercase;letter-spacing:1px;
@@ -193,7 +197,8 @@ def send_curation_report(subscribers: list[str], report: dict[str, Any]) -> Send
     if not settings.sendgrid_api_key or not settings.sendgrid_from_email:
         raise RuntimeError("SENDGRID_API_KEY and SENDGRID_FROM_EMAIL must be set.")
 
-    subject = f"Curación de Contenidos — {report.get('title', 'Novedades del Sector')}"
+    run_date = report.get("run_date", datetime.now().strftime("%d/%m/%Y"))
+    subject = f"Tus 3 posts de LinkedIn · {run_date}"
 
     # Send one email per subscriber for better deliverability + personalized greeting
     sg = sendgrid.SendGridAPIClient(api_key=settings.sendgrid_api_key)
