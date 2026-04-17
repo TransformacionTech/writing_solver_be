@@ -31,6 +31,9 @@ readerTask = Task(
             ✅ Genera tensión, reflexión o deseo de contacto
             ❌ Penaliza: post meramente informativo, ausencia de intención
                 comercial, listas sin impacto narrativo
+            ❌ Penaliza: cuando la solicitud incluye un caso o hecho concreto
+                y el post lo describe o promociona en lugar de usarlo para
+                analizar una tendencia del sector.
 
         [D] REGLAS EDITORIALES DURAS — Verificación objetiva:
             ✅ Longitud entre 200 y 250 palabras
