@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from datetime import datetime
 from typing import Any
 
@@ -13,11 +14,24 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 
+def name_from_email(email: str) -> str:
+    """Extract a presentable name from an email address.
+
+    Examples:
+      transformacion@techandsolve.com  -> 'Transformacion'
+      juan.perez@foo.com               -> 'Juan Perez'
+      maria_lopez@foo.com              -> 'Maria Lopez'
+    """
+    local = email.split("@")[0]
+    cleaned = re.sub(r"[._\-]+", " ", local).strip()
+    return cleaned.title() if cleaned else email
+
+
 # ---------------------------------------------------------------------------
 # HTML builder
 # ---------------------------------------------------------------------------
 
-def _build_html(report: dict[str, Any]) -> str:
+def _build_html(report: dict[str, Any], recipient_name: str = "") -> str:
     """
     Build the HTML body for the curation report email.
 
@@ -27,36 +41,43 @@ def _build_html(report: dict[str, Any]) -> str:
         "sources": [{"name": str, "url": str}],
         "summary": str,
         "topics_by_source": [{"source": str, "topics": [str]}],
-        "posts": [
-            {
-                "title": str,
-                "content": str,
-                "why_relevant": str,
-                "source": str,
-            }
-        ],
+        "posts": [...],
         "run_date": str,
+        "intro_text": str,   # cuerpo del saludo, escrito con tono T&S
     }
+    `recipient_name` se inyecta en el saludo "Hola, {nombre}".
     """
     run_date = report.get("run_date", datetime.now().strftime("%d/%m/%Y"))
-
-    sources_html = "".join(
-        f'<li><a href="{s["url"]}" style="color:#6200EA">{s["name"]}</a></li>'
-        for s in report.get("sources", [])
+    intro_text = report.get(
+        "intro_text",
+        "Te presento el informe de los posts sugeridos para este día con los "
+        "temas publicados recientemente en las fuentes monitoreadas.",
     )
+    greeting = f"Hola, {recipient_name}." if recipient_name else "Hola."
+    posts = report.get("posts", [])
 
-    topics_by_source_html = "".join(
+    # CHANGE 3 — Resumen de esta quincena: por cada post, título + why_relevant
+    quincena_summary_html = "".join(
         f"""
-        <div style="margin-bottom:12px">
-            <strong style="color:#333">{ts["source"]}</strong>
-            <ul style="margin:4px 0 0 0;padding-left:20px;color:#555">
-                {"".join(f"<li>{t}</li>" for t in ts["topics"])}
-            </ul>
+        <div style="margin-bottom:14px">
+            <p style="margin:0 0 4px 0;color:#333;font-size:0.92rem;font-weight:600">
+                {i + 1}. {p["title"]}
+            </p>
+            <p style="margin:0;color:#555;font-size:0.88rem;line-height:1.6">
+                {p.get("why_relevant", "")}
+            </p>
         </div>
         """
-        for ts in report.get("topics_by_source", [])
+        for i, p in enumerate(posts)
     )
 
+    # CHANGE 4 — Posts de esta quincena: lista numerada de títulos, sin URLs
+    titles_list_html = "".join(
+        f'<li style="margin-bottom:4px;color:#333">{p["title"]}</li>'
+        for p in posts
+    )
+
+    # CHANGE 5 — bloques de post sin "¿Por qué es relevante?"
     posts_html = "".join(
         f"""
         <div style="background:#f9f6ff;border-left:4px solid #6200EA;padding:16px 20px;
@@ -65,13 +86,9 @@ def _build_html(report: dict[str, Any]) -> str:
             <div style="white-space:pre-wrap;color:#333;font-size:0.9rem;line-height:1.6">
                 {p["content"]}
             </div>
-            <div style="margin-top:12px;padding-top:10px;border-top:1px solid #ddd">
-                <strong style="color:#6200EA;font-size:0.82rem">¿Por qué es relevante?</strong>
-                <p style="margin:4px 0 0 0;color:#555;font-size:0.85rem">{p["why_relevant"]}</p>
-            </div>
         </div>
         """
-        for i, p in enumerate(report.get("posts", []))
+        for i, p in enumerate(posts)
     )
 
     return f"""
@@ -80,51 +97,61 @@ def _build_html(report: dict[str, Any]) -> str:
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Curación de Contenidos — Tech And Solve</title>
+        <title>Tus 3 contenidos de esta quincena · Tech And Solve</title>
     </head>
     <body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif">
         <div style="max-width:680px;margin:32px auto;background:#fff;border-radius:12px;
                     overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08)">
 
-            <!-- Header -->
+            <!-- CHANGE 1 — Header -->
             <div style="background:linear-gradient(135deg,#6200EA,#3d0099);
                         padding:28px 32px;color:#fff">
-                <div style="font-size:0.78rem;opacity:0.8;margin-bottom:4px">
-                    Curación automática · {run_date}
+                <div style="font-size:0.95rem;font-weight:600">
+                    Tus 3 contenidos de esta quincena · {run_date}
                 </div>
-                <h1 style="margin:0;font-size:1.5rem;font-weight:700">
-                    {report.get("title", "Novedades del Sector")}
-                </h1>
             </div>
 
             <!-- Body -->
             <div style="padding:28px 32px">
 
-                <!-- Fuentes -->
-                <h2 style="font-size:0.95rem;text-transform:uppercase;letter-spacing:1px;
-                           color:#6200EA;margin:0 0 8px 0">Fuentes consultadas</h2>
-                <ul style="margin:0 0 24px 0;padding-left:20px;color:#555">
-                    {sources_html}
-                </ul>
-
-                <!-- Resumen -->
-                <h2 style="font-size:0.95rem;text-transform:uppercase;letter-spacing:1px;
-                           color:#6200EA;margin:0 0 8px 0">Resumen de las fuentes</h2>
-                <p style="margin:0 0 24px 0;color:#333;line-height:1.7;font-size:0.92rem">
-                    {report.get("summary", "")}
+                <!-- CHANGE 2 — Saludo + intro -->
+                <p style="margin:0 0 8px 0;font-size:1rem;color:#333;font-weight:600">
+                    {greeting}
+                </p>
+                <p style="margin:0 0 24px 0;color:#333;line-height:1.7;font-size:0.95rem">
+                    {intro_text}
                 </p>
 
-                <!-- Temas por fuente -->
+                <!-- CHANGE 3 — Resumen de esta quincena -->
                 <h2 style="font-size:0.95rem;text-transform:uppercase;letter-spacing:1px;
-                           color:#6200EA;margin:0 0 12px 0">Temas sugeridos por fuente</h2>
+                           color:#6200EA;margin:0 0 12px 0">Resumen de esta quincena</h2>
                 <div style="margin-bottom:24px">
-                    {topics_by_source_html}
+                    {quincena_summary_html}
                 </div>
 
-                <!-- Posts recomendados -->
+                <!-- CHANGE 4 — Posts de esta quincena -->
+                <h2 style="font-size:0.95rem;text-transform:uppercase;letter-spacing:1px;
+                           color:#6200EA;margin:0 0 12px 0">Posts de esta quincena</h2>
+                <ol style="margin:0 0 24px 0;padding-left:20px;color:#333">
+                    {titles_list_html}
+                </ol>
+
+                <!-- CHANGE 5 — Post blocks (sin "¿Por qué es relevante?") -->
                 <h2 style="font-size:0.95rem;text-transform:uppercase;letter-spacing:1px;
                            color:#6200EA;margin:0 0 16px 0">Posts recomendados</h2>
                 {posts_html}
+
+                <!-- CHANGE 6 — Feedback CTA -->
+                <div style="margin-top:8px;padding:18px 20px;background:#f9f6ff;
+                            border-radius:8px;color:#333;font-size:0.9rem;line-height:1.6">
+                    <p style="margin:0 0 6px 0;font-weight:600">¿Qué te parecen los posts de esta quincena?</p>
+                    <p style="margin:0">
+                        Si algo te gustó, no funcionó o quieres que ajustemos el enfoque,
+                        responde este correo con tu comentario.
+                        Tu feedback se tiene en cuenta para seguir mejorando
+                        los próximos contenidos.
+                    </p>
+                </div>
 
             </div>
 
@@ -166,16 +193,17 @@ def send_curation_report(subscribers: list[str], report: dict[str, Any]) -> Send
     if not settings.sendgrid_api_key or not settings.sendgrid_from_email:
         raise RuntimeError("SENDGRID_API_KEY and SENDGRID_FROM_EMAIL must be set.")
 
-    html_content = _build_html(report)
     subject = f"Curación de Contenidos — {report.get('title', 'Novedades del Sector')}"
 
-    # Send one email per subscriber for better deliverability
+    # Send one email per subscriber for better deliverability + personalized greeting
     sg = sendgrid.SendGridAPIClient(api_key=settings.sendgrid_api_key)
     all_ok = True
     last_status = 0
     last_body = ""
 
     for email in subscribers:
+        recipient_name = name_from_email(email)
+        html_content = _build_html(report, recipient_name=recipient_name)
         message = Mail(
             from_email=settings.sendgrid_from_email,
             to_emails=email,

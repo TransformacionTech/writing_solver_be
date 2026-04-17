@@ -217,6 +217,40 @@ async def _generate_post(topic: dict) -> tuple[str, int, bool]:
 
 
 # ---------------------------------------------------------------------------
+# Email intro — written in Tech And Solve tone (same agent as the writer)
+# ---------------------------------------------------------------------------
+
+async def _generate_email_intro(topics: list[dict], run_date: str) -> str:
+    """Generate a 2-3 sentence intro paragraph for the curation email, written
+    with Tech And Solve's tone (reuses the writer agent, which already has the
+    tone baked into its backstory)."""
+    titles = "\n".join(f"- {t['title']}" for t in topics)
+    description = (
+        f"Escribe una introducción corta (2-3 oraciones, máximo 50 palabras) "
+        f"para el cuerpo de un correo que acompaña el informe quincenal de "
+        f"curación de contenidos del sector asegurador latinoamericano.\n\n"
+        f"El correo va después del saludo 'Hola, {{nombre}}.' — tu texto empieza "
+        f"en la siguiente línea. NO incluyas saludo, NO incluyas despedida, NO "
+        f"firmes. Solo el cuerpo de la introducción.\n\n"
+        f"Contexto del informe (fecha {run_date}):\n"
+        f"Los temas publicados recientemente que se incluyen son:\n{titles}\n\n"
+        f"Tono: profesional, directo, con criterio propio. Con autoridad sin "
+        f"soberbia. Con calidez sin informalidad excesiva. Nunca promocional.\n\n"
+        f"Ejemplo del espíritu (NO copiar): 'Te presento el informe de los "
+        f"posts sugeridos para este día con los temas publicados recientemente.'"
+    )
+    intro_task = Task(
+        description=description,
+        agent=writer,
+        expected_output="Solo el texto del párrafo de introducción. Sin saludos, "
+                        "sin despedidas, sin firmas, sin títulos, sin comillas.",
+    )
+    crew = Crew(agents=[writer], tasks=[intro_task], verbose=False)
+    result = await _run_async(crew, {})
+    return str(result).strip().strip('"').strip("'")
+
+
+# ---------------------------------------------------------------------------
 # Step 5 — build the SendGrid report payload
 # ---------------------------------------------------------------------------
 
@@ -225,6 +259,7 @@ def _build_report(
     posts: list[tuple[str, int]],
     articles: list[dict],
     run_date: str,
+    intro_text: str = "",
 ) -> dict:
     # Unique source names/urls
     seen_urls: set[str] = set()
@@ -266,6 +301,7 @@ def _build_report(
         "topics_by_source": topics_by_source,
         "posts": report_posts,
         "run_date": run_date,
+        "intro_text": intro_text,
     }
 
 
@@ -343,7 +379,8 @@ async def run_curation() -> dict:
             return {"status": "no_approved", "topics_found": 0, "email_sent": False}
 
         # 5. Build report and send email (solo aprobados)
-        report = _build_report(approved_topics, approved_posts, articles, run_date)
+        intro_text = await _generate_email_intro(approved_topics, run_date)
+        report = _build_report(approved_topics, approved_posts, articles, run_date, intro_text)
         subscribers = supa.get_active_subscribers()
         email_sent = bool(sg_service.send_curation_report(subscribers, report))
 
@@ -485,8 +522,10 @@ async def run_curation_stream() -> AsyncGenerator[str, None]:
             yield _evt("done")
             return
 
-        yield _evt("progress", step="email", message=f"{len(approved_posts)} post(s) aprobado(s). Construyendo informe HTML...")
-        report = _build_report(approved_topics, approved_posts, articles, run_date)
+        yield _evt("progress", step="email", message=f"{len(approved_posts)} post(s) aprobado(s). Generando intro con tono T&S...")
+        intro_text = await _generate_email_intro(approved_topics, run_date)
+        yield _evt("progress", step="email", message="Construyendo informe HTML...")
+        report = _build_report(approved_topics, approved_posts, articles, run_date, intro_text)
 
         subscribers = supa.get_active_subscribers()
         yield _evt("progress", step="email", message=f"Enviando a {len(subscribers)} suscriptor(es): {subscribers} desde {settings.sendgrid_from_email}...")
