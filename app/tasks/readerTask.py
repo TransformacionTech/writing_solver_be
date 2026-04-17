@@ -41,6 +41,17 @@ readerTask = Task(
             ✅ Si menciona a Tech And Solve, lo hace de forma natural, no forzada
             ✅ El concepto central del tema DEBE estar definido en términos simples
                 ANTES de cualquier análisis, diagnóstico o prescripción
+            ✅ Exactamente una pregunta de cierre — dos preguntas consecutivas al final
+                del post = violación dura (−1 punto)
+            ✅ Cierre en modo reflexión o experiencia, nunca en modo prescriptivo o
+                imperativo — aplica aunque la pregunta no nombre un cargo directivo
+                explícito (violación = −1 punto)
+                Ejemplos de violación: "¿Qué tienes que rediseñar?", "¿Qué deberías
+                cambiar primero?", "¿Cuándo vas a empezar?"
+            ✅ Todo claim comparativo o estructural incluye cifra + fuente + año —
+                frases como "baja penetración", "tendencia creciente", "mínimos
+                históricos" o "freno estructural" sin dato adjunto = violación dura
+                (−1 punto por claim sin respaldo)
             ✅ El cierre NO debe estar dirigido a un cargo directivo específico
                 (CIO, VP, Director, C-level) a menos que la solicitud original
                 lo haya pedido explícitamente

@@ -19,7 +19,7 @@ from collections.abc import AsyncGenerator
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
-from crewai import Crew
+from crewai import Crew, Task
 
 from app.agents.curatorAgent import curator
 from app.agents.writerAgent import writer
@@ -140,26 +140,57 @@ def _parse_curator_output(raw: str) -> list[dict]:
 # Step 4 — generate one post per topic using writer → editor ↔ reader
 # ---------------------------------------------------------------------------
 
+def _format_investigation(topic: dict) -> str:
+    """Format curator output in the researcher's structured style so the writer
+    treats it as real investigation, not as the user's request."""
+    return (
+        f"## SOLICITUD ORIGINAL\n"
+        f"Escribe un post sobre: {topic['title']}\n\n"
+        f"## TEMA REFORMULADO\n"
+        f"{topic['title']}\n\n"
+        f"## CONTEXTO GENERAL\n"
+        f"{topic['resumen']}\n\n"
+        f"## HALLAZGOS CLAVE\n"
+        f"{topic['datos_clave']}\n\n"
+        f"**Relevancia sectorial:** {topic['relevancia']}\n\n"
+        f"**Fuentes consultadas:** {topic['fuentes']}\n\n"
+        f"## BRECHAS Y LIMITACIONES\n"
+        f"Sin brechas significativas (investigación provista por el curador a partir "
+        f"de las fuentes monitoreadas)."
+    )
+
+
+def _build_writer_task_for_curation(topic: dict) -> Task:
+    """Dynamic writer task that embeds the curator's synthesis directly in the
+    prompt (in the same slot the writer expects the researcher's output)."""
+    investigation = _format_investigation(topic)
+    description = (
+        writerTask.description
+        .replace(
+            "[La investigación elaborada por el agente investigador está disponible en el contexto de esta tarea]",
+            investigation,
+        )
+    )
+    return Task(
+        description=description,
+        agent=writer,
+        expected_output=writerTask.expected_output,
+    )
+
+
 async def _generate_post(topic: dict) -> tuple[str, int, bool]:
     """
     Run the write+edit+validate loop for a single topic dict.
     Returns (final_post_text, score, approved).
     """
-    # Inject the curator's full synthesis INTO the topic string so the writer
-    # actually sees the investigation. The writerTask description only expands
-    # {topic}, not {context}, so we enrich the topic value itself.
-    enriched_topic = (
-        f"{topic['title']}\n\n"
-        f"--- INVESTIGACIÓN DEL CURADOR ---\n\n"
-        f"RESUMEN:\n{topic['resumen']}\n\n"
-        f"DATOS CLAVE (con fuentes):\n{topic['datos_clave']}\n\n"
-        f"FUENTES USADAS:\n{topic['fuentes']}\n\n"
-        f"RELEVANCIA SECTORIAL:\n{topic['relevancia']}"
-    )
+    # Build a dynamic writer task that includes the curator synthesis in the
+    # <investigacion> slot the writer expects. This keeps writerTask (intocable)
+    # unchanged while giving the writer real research to work with.
+    writer_task_with_investigation = _build_writer_task_for_curation(topic)
 
     # Phase 1 — Write (no researcher: curator already did the research)
-    write_crew = Crew(agents=[writer], tasks=[writerTask], verbose=False)
-    write_result = await _run_async(write_crew, {"topic": enriched_topic, "context": ""})
+    write_crew = Crew(agents=[writer], tasks=[writer_task_with_investigation], verbose=False)
+    write_result = await _run_async(write_crew, {"topic": topic["title"]})
     draft = str(write_result)
 
     # Phase 2 — Edit ↔ Reader loop
